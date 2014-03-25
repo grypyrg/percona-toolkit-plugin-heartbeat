@@ -50,10 +50,14 @@ my $rows;
 # pt-osc-override_slavelag-pt-heartbeat.pm
 # #############################################################################
 
-$master_dbh->prepare("create database if not exists percona")->execute();
+$master_dbh->prepare("drop database if exists percona")->execute();
+$master_dbh->prepare("create database percona")->execute();
 $master_dbh->prepare("create table if not exists percona.t ( a int primary key);")->execute();
+$master_dbh->prepare("insert into percona.t values (0),(1),(2),(3),(4),(5),(6),(7),(8),(9)")->execute();
+$master_dbh->prepare("analyze table percona.t;")->execute();
 
-system("$trunk/bin/pt-heartbeat -D percona --update $master_dsn --interval 10 --run-time 12 --create-table --daemonize");
+
+system("$trunk/bin/pt-heartbeat -D percona --update $master_dsn --interval 6 --run-time 7 --create-table --daemonize");
 
 
 # heartbeat is stopped, we wait for 2 seconds, so the max lag of 1 should be reached
@@ -64,13 +68,15 @@ sleep 2;
 ($output) = full_output(
    sub { pt_online_schema_change::main(
       "$master_dsn,D=percona,t=t",
-      '--plugin', "$plugin",
       '--max-lag', '1',
       '--progress', 'time,1',
+      '--chunk-size', '1',
+      '--plugin', "$plugin",
       qw(--statistics --execute),
    )},
    stderr => 1,
 );
+
 
 my @called = $output =~ m/^PLUGIN .*$/gm;
 is_deeply(
@@ -81,11 +87,21 @@ is_deeply(
    "Check if the pt-hearbeat plugin is properly enabled"
 ) or diag(Dumper($output));
 
-print STDERR $output . "\n";
+
+my @replica_lag = $output =~ m/^Replica lag is/gm;
+is_deeply(
+   $replica_lag[0],
+   'Replica lag is',
+   "Check if replica lag happened"
+) or diag(Dumper($output));
+
 
 # #############################################################################
 # Done.
 # #############################################################################
+# we wait another 2 seconds, then pt-heartbeat is done
+sleep 2;
+
 $sb->wipe_clean($master_dbh);
 ok($sb->ok(), "Sandbox servers") or BAIL_OUT(__FILE__ . " broke the sandbox");
 done_testing;
