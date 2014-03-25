@@ -1,27 +1,23 @@
-package pt_online_schema_change_plugin;
 
-use strict;
-use warnings FATAL => 'all';
-use English qw(-no_match_vars);
-use constant PTDEBUG => $ENV{PTDEBUG} || 0;
-
-sub new {
-   my ($class, %args) = @_;
-   my $self = { %args };
-   return bless $self, $class;
-}
+# #############################################################################
+# The actual override_slavelag_check which is invoked by the plugin classes
+# #############################################################################
+{
+package plugin_heartbeat;
 
 sub override_slavelag_check {
    my ($self, %args) = @_;
    # oktorun is a reference, also update it using $$oktorun=0;
    my $oktorun=$args{oktorun};
+   
+   my $heartbeattable="percona.heartbeat";
 
    print "PLUGIN override_slavelag_check: pt-heartbeat will be checked\n";
 
    my $get_lag = sub {
          my ($cxn) = @_;
          my $dbh = $cxn->dbh();
-
+   
          if ( !$dbh || !$dbh->ping() ) {
             eval { $dbh = $cxn->connect() };  # connect or die trying
             if ( $EVAL_ERROR ) {
@@ -49,7 +45,7 @@ sub override_slavelag_check {
                                  )
                            )
                      ) as lag_sec 
-            FROM percona.heartbeat");
+            FROM $heartbeattable");
 
          # we return oktorun and the lag
          return $res->{lag_sec};
@@ -57,5 +53,50 @@ sub override_slavelag_check {
 
    return $get_lag;
 }
+}
+1;
+# #############################################################################
+# pt_online_schema_change_plugin
+# #############################################################################
+{
+package pt_online_schema_change_plugin;
 
+use strict;
+use warnings FATAL => 'all';
+use English qw(-no_match_vars);
+use constant PTDEBUG => $ENV{PTDEBUG} || 0;
+
+sub new {
+   my ($class, %args) = @_;
+   my $self = { %args };
+   return bless $self, $class;
+}
+
+sub override_slavelag_check {
+   return plugin_heartbeat::override_slavelag_check(@_);
+}
+}
+1;
+
+# #############################################################################
+# pt_table_checksum_plugin
+# #############################################################################
+{
+package pt_table_checksum_plugin;
+
+use strict;
+use warnings FATAL => 'all';
+use English qw(-no_match_vars);
+use constant PTDEBUG => $ENV{PTDEBUG} || 0;
+
+sub new {
+   my ($class, %args) = @_;
+   my $self = { %args };
+   return bless $self, $class;
+}
+
+sub override_slavelag_check {
+   return plugin_heartbeat::override_slavelag_check(@_);
+}
+}
 1;

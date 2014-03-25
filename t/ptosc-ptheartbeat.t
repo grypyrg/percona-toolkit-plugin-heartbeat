@@ -41,13 +41,13 @@ my $cwd = getcwd();
 my $output;
 my $master_dsn = $sb->dsn_for('master');
 my $slave_dsn  = $sb->dsn_for('slave1');
-my $plugin = "$cwd/pt-osc-override_slavelag-pt-heartbeat.pm";
+my $plugin = "$cwd/pt-plugin-heartbeat.pm";
 my $exit;
 my $rows;
 
 
 # #############################################################################
-# pt-osc-override_slavelag-pt-heartbeat.pm
+# ptosc-ptheartbeat.t
 # #############################################################################
 
 $master_dbh->prepare("drop database if exists percona")->execute();

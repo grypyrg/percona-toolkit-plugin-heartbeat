@@ -1,4 +1,4 @@
-percona-toolkit-pt-osc-plugin-heartbeat
+Percona Toolkit Plugin for pt-heartbeat
 =======================================
 
-Percona Toolkit Plugin for pt-online-schema-change to support pt-heartbeat slave lag checking
+This plugin adds support for pt-heartbeat monitoring when running pt-table-checksum and pt-online-schema-change
