@@ -5,14 +5,14 @@
 {
 package plugin_heartbeat;
 
-sub override_slavelag_check {
+sub get_slave_lag {
    my ($self, %args) = @_;
    # oktorun is a reference, also update it using $$oktorun=0;
    my $oktorun=$args{oktorun};
    
    my $heartbeattable="percona.heartbeat";
 
-   print "PLUGIN override_slavelag_check: pt-heartbeat will be checked\n";
+   print "PLUGIN get_slave_lag: pt-heartbeat will be checked\n";
 
    my $get_lag = sub {
          my ($cxn) = @_;
@@ -72,8 +72,8 @@ sub new {
    return bless $self, $class;
 }
 
-sub override_slavelag_check {
-   return plugin_heartbeat::override_slavelag_check(@_);
+sub get_slave_lag {
+   return plugin_heartbeat::get_slave_lag(@_);
 }
 }
 1;
@@ -95,8 +95,8 @@ sub new {
    return bless $self, $class;
 }
 
-sub override_slavelag_check {
-   return plugin_heartbeat::override_slavelag_check(@_);
+sub get_slave_lag {
+   return plugin_heartbeat::get_slave_lag(@_);
 }
 }
 1;

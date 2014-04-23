@@ -82,7 +82,7 @@ my @called = $output =~ m/^PLUGIN .*$/gm;
 is_deeply(
    \@called,
    [
-      'PLUGIN override_slavelag_check: pt-heartbeat will be checked',
+      'PLUGIN get_slave_lag: pt-heartbeat will be checked',
    ],
    "Check if the pt-hearbeat plugin is properly enabled"
 ) or diag(Dumper($output));
