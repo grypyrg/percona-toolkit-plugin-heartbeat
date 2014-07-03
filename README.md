@@ -15,5 +15,4 @@ Then run either *pt-online-schema-change* or *pt-table-checksum* with *--plugin=
 Percona Toolkit Version
 -----------------------
 
-This plugin does not work with Percona Toolkit (currently 2.2.7). A different code branch has been created to develop the feature: https://code.launchpad.net/~gryp/percona-toolkit/ptosc-lagwaiter-ptheartbeat/+merge/212652
-This is expected to end up in Percona Toolkit Eventually.
+This requires Percona Toolkit 2.2.8 or newer.
